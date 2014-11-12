@@ -15,7 +15,7 @@
 
 enum commandType
 {
-    ERROR=-1,
+    commandError=-1,
     upgrade=0,
     execute=1,
     set=2,
@@ -26,7 +26,7 @@ typedef enum commandType commandType;
 
 enum upgradeStat
 {
-    ERROR=-1,
+    statError=-1,
     power=0,
     range=1,
     speed=2,
@@ -43,7 +43,8 @@ void freeCommandArray(char **commandArray,int numberOfChunks);
 char ** breakUpString(const char * inputString, int *numberOfChunksPtr);
 void testCommandArray(char ** commandArray, int numberOfChunks);
 void testGetAction(enum commandType action);
-
+void actionUsageError( commandType action, const char ** validActions, int numberOfActions);
+upgradeStat getUpgradeStats(const char * inputStringUpgradeStats);
 
 
 

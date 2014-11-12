@@ -14,39 +14,57 @@ void parse(char *inputString)
     int numberOfChunks;
     char **commandArray = breakUpString(inputString, &numberOfChunks);
     
-    //testCommandArray(commandArray, numberOfChunks);
+    testCommandArray(commandArray, numberOfChunks);
     
     //enumerated type commandType can describe each of the possible commands(see parser.h)
     commandType action = getAction(commandArray[0]);//the first string in the command should contain the action
-    if(action==ERROR)//if getAction returns ERROR then the input is invalid
+    if(action==commandError)//if getAction returns commandError then the input is invalid
     {                //Error messaging handled in getAction function
         return;
     }
-    //testGetAction(action);
+    testGetAction(action);
+    
     /**** Now we deal with each possible command separately as they all have different syntax****/
     switch (action)
-    {//should check here to see if there was the correct numberOfChunks for the command they mean to execute
+    {
         case upgrade:
-            if(numberOfChunks != 3)
-            upgradeStat * statsToUpgrade = getUpgradeStats(commandArray[1]);
+            parseUpgrade();
         case execute:
             action = execute;
-            return action;
+            
         case set:
             action = set;
-            return action;
         case man:
             action = man;
-            return action;
         case cat:
             action = cat;
-            return action;
     }
     
     
     
     freeCommandArray(commandArray, numberOfChunks);
 }
+
+
+
+void parseUpgrade(const char ** commandArray, const int numberOfChunks)
+{
+    upgradeStat statToUpgrade = getUpgradeStats(commandArray[1]);
+
+}
+
+
+
+
+upgradeStat getUpgradeStats(const char * inputStringUpgradeStats)
+{
+    upgradeStat statToUpgrade=statError;//this will be an array containing all the stats to upgrade that have been specified by the user
+    
+    return statToUpgrade;
+}
+
+
+
 
 /* Takes the input string and breaks into separate words (where there is a space and new string starts) each of these words is stored in the commandArray which is an array of strings*/
 char **breakUpString(const char * inputString, int *numberOfChunksPtr)
@@ -88,7 +106,7 @@ commandType getAction( const char * inputAction )
     validActions[3]="man";
     validActions[4]="cat";
     //now test the input string against all valid actions
-    commandType action = ERROR;
+    commandType action = commandError;
     for(int i=0; i<numberOfActions; ++i)
     {
         if(strcmp(inputAction,validActions[i])==0)//if the string is identical to one of the commands
@@ -115,25 +133,20 @@ commandType getAction( const char * inputAction )
         }
     }
     
-    if(action==ERROR)//if it is still set to ERROR then the user made a mistake
+    if(action==commandError)//if it is still set to ERROR then the user made a mistake
     {
-        usageError(action);
+        actionUsageError(action, validActions, numberOfActions);
     }
     free(validActions);//free the mallocd array
     return action;
 }
 
-upgradeStat * getUpgradeStats(const char * inputUpgradeStats)
-{
-    upgradeStat * statsToUpgrade=NULL;//this will be an array containing all the stats to upgrade that have been specified by the user
-    
-    
-}
-                         
+
+
 /* if there was a syntax error in the users command call this function which will print usage advice to the terminal window*/
-void usageError( commandType action)
+void actionUsageError( commandType action, const char ** validActions, int numberOfActions)
 {
-    if(action==ERROR)//if it is still set to ERROR then the user made a mistake
+    if(action==commandError)//if it is still set to ERROR then the user made a mistake
     {
         fprintf(stderr,"*** Action not recognised ***\n");
         fprintf(stderr,"Possible commands: \n");
