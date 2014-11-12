@@ -1,8 +1,9 @@
 
 CFLAGS =-framework SDL2  -O4 -Wall -pedantic -std=c99 -lm
-INCS = parser.h 
+INCS = 
 TARGET = main
-SOURCES =  parser.c $(TARGET).c
+SRCDIR = ./sources/
+SOURCES = $(SRCDIR)actionQueueDataStructure.c $(SRCDIR)parser.c $(SRCDIR)$(TARGET).c 
 LIBS = 
 CC = gcc
 
