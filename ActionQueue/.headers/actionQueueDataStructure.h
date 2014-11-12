@@ -28,5 +28,5 @@ typedef struct actionQueueStructure *ActionQueueStructure;
 
 ActionQueueStructure createActionQueue(int size );
 QueueNode createNode();
-int pushToQueue(ActionQueueStructure queue, int newData);
+int pushToQueue(ActionQueueStructure queue, commandType command, upgradeStat option, int target);
 int popFromQueue(ActionQueueStructure queue);

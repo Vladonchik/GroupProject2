@@ -12,13 +12,16 @@
 /*---------- Custom Headers	-----------*/
 
 #include ".headers/debug.h"
+#include ".headers/parser.h"
 #include ".headers/actionQueueDataStructure.h"
 
 /*---------- Data Types -----------*/
 
 struct queueNode {
-
-    int num;
+	
+	commandType command; //command for execution
+	upgradeStat option; //stat to change
+	int target;	//target of command
     struct queueNode *nextNode;
 
 };
@@ -71,11 +74,13 @@ QueueNode createNode()	{
 
 }
 
-int pushToQueue(ActionQueueStructure queue, int newData)	{
+int pushToQueue(ActionQueueStructure queue, commandType command, upgradeStat option, int target)	{
 	
 	if(queue->current != NULL)	{
 		queue->current->nextNode = createNode();
-		queue->current->num = newData;
+		queue->current->command = command;
+		queue->current->option = option;
+		queue->current->target = target;
 		queue->current = queue->current->nextNode;
 		(queue->nItems)++;
 		return (queue->nItems);
