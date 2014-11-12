@@ -22,6 +22,19 @@ enum commandType
     man=3,
     cat=4
 };
+typedef enum commandType commandType;
+
+enum upgradeStat
+{
+    ERROR=-1,
+    power=0,
+    range=1,
+    speed=2,
+    AOErange=3,
+    AOEpower=4
+};
+typedef enum upgradeStat upgradeStat;
+
 
 int getAction( const char * inputAction );
 char * strdup(const char * s);

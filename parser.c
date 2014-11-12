@@ -16,20 +16,67 @@ void parse(char *inputString)
     
     //testCommandArray(commandArray, numberOfChunks);
     
-    enum commandType action = getAction(commandArray[0]);//the first string in the command should contain the action
-    if(action==ERROR)//if getAction returns ERROR then the input as invalid
+    //enumerated type commandType can describe each of the possible commands(see parser.h)
+    commandType action = getAction(commandArray[0]);//the first string in the command should contain the action
+    if(action==ERROR)//if getAction returns ERROR then the input is invalid
     {                //Error messaging handled in getAction function
         return;
     }
-    
     //testGetAction(action);
+    /**** Now we deal with each possible command separately as they all have different syntax****/
+    switch (action)
+    {//should check here to see if there was the correct numberOfChunks for the command they mean to execute
+        case upgrade:
+            if(numberOfChunks != 3)
+            upgradeStat * statsToUpgrade = getUpgradeStats(commandArray[1]);
+        case execute:
+            action = execute;
+            return action;
+        case set:
+            action = set;
+            return action;
+        case man:
+            action = man;
+            return action;
+        case cat:
+            action = cat;
+            return action;
+    }
+    
     
     
     freeCommandArray(commandArray, numberOfChunks);
 }
 
-/* Takes the first string of the input command and tests it against the correct syntax to find which command they want to execute  */
-enum commandType getAction( const char * inputAction )
+/* Takes the input string and breaks into separate words (where there is a space and new string starts) each of these words is stored in the commandArray which is an array of strings*/
+char **breakUpString(const char * inputString, int *numberOfChunksPtr)
+{
+    char    *stringChunk,  //holds the chunks on the input string as we break it up
+    *inputStringDuplicate = strdup(inputString),//duplicate input string for editting
+    **commandArray = NULL;//this will be an array to hold each of the chunk strings
+    int     numberOfChunks=0;
+    
+    //using http://www.tutorialspoint.com/c_standard_library/c_function_strtok.htm
+    stringChunk = strtok(inputStringDuplicate, " "); // gets the first chunk (up to the first space)
+    
+    // walk through rest of string
+    while( stringChunk != NULL )
+    {
+        ++numberOfChunks;
+        commandArray=(char **)realloc(commandArray,numberOfChunks*sizeof(char*));//array of strings
+        commandArray[numberOfChunks-1]=(char *)malloc((size_t)(strlen(stringChunk)*sizeof(char)+1));
+        strcpy(commandArray[numberOfChunks-1],stringChunk);
+        
+        stringChunk = strtok(NULL, " ");
+    }
+    free(inputStringDuplicate);//frees the malloc made in strdup()
+                               //$(numberOfChunks) strings now stored in the commandArray
+    *numberOfChunksPtr=numberOfChunks;
+    return commandArray;
+}
+
+/* Takes the first string of the input command and tests it against the correct syntax to find which command they want to execute then returns that command as a enum commandType variable  */
+commandType getAction( const char * inputAction )
 {
     /*first lets make an array of strings to hold all the possible action commands*/
     const char **validActions;
@@ -40,12 +87,12 @@ enum commandType getAction( const char * inputAction )
     validActions[2]="set";
     validActions[3]="man";
     validActions[4]="cat";
-    
-    enum commandType action = ERROR;
+    //now test the input string against all valid actions
+    commandType action = ERROR;
     for(int i=0; i<numberOfActions; ++i)
     {
-        if(strcmp(inputAction,validActions[i])==0)
-        {
+        if(strcmp(inputAction,validActions[i])==0)//if the string is identical to one of the commands
+        {                                        //then action is set to that command
             switch (i)
             {
                 case 0:
@@ -68,7 +115,25 @@ enum commandType getAction( const char * inputAction )
         }
     }
     
-    if(action==ERROR)
+    if(action==ERROR)//if it is still set to ERROR then the user made a mistake
+    {
+        usageError(action);
+    }
+    free(validActions);//free the mallocd array
+    return action;
+}
+
+upgradeStat * getUpgradeStats(const char * inputUpgradeStats)
+{
+    upgradeStat * statsToUpgrade=NULL;//this will be an array containing all the stats to upgrade that have been specified by the user
+    
+    
+}
+                         
+/* if there was a syntax error in the users command call this function which will print usage advice to the terminal window*/
+void usageError( commandType action)
+{
+    if(action==ERROR)//if it is still set to ERROR then the user made a mistake
     {
         fprintf(stderr,"*** Action not recognised ***\n");
         fprintf(stderr,"Possible commands: \n");
@@ -76,46 +141,17 @@ enum commandType getAction( const char * inputAction )
         {
             fprintf(stderr,"%s\n",validActions[i]);
         }
-        fprintf(stderr,"\nType man [COMMAND] for usage\n");
-    }
-    free(validActions);
-    return action;
+        fprintf(stderr,"\nType man [COMMAND] for usage\n");//we advise them on usage
+    }//error messages will need to be passed back to the terminal to be printed. hopefully can do this by setting up a custom stream. For now will print to stderr.
 }
-
-/* Takes the input string and breaks into separate words (where there is a space and new string starts) each of these words is stored in the commandArray which is an array of strings*/
-char **breakUpString(const char * inputString, int *numberOfChunksPtr)
-{
-    char    *stringChunk,  //holds the chunks on the input string as we break it up
-            *inputStringDuplicate = strdup(inputString),//duplicate input string for editting
-            **commandArray = NULL;//this will be an array to hold each of the chunk strings
-    int     numberOfChunks=0;
-    
-    //using http://www.tutorialspoint.com/c_standard_library/c_function_strtok.htm
-    stringChunk = strtok(inputStringDuplicate, " "); // gets the first chunk (up to the first space)
-    
-    // walk through rest of string
-    while( stringChunk != NULL )
-    {
-        ++numberOfChunks;
-        commandArray=(char **)realloc(commandArray,numberOfChunks*sizeof(char*));//array of strings
-        commandArray[numberOfChunks-1]=(char *)malloc((size_t)(strlen(stringChunk)*sizeof(char)+1));
-        strcpy(commandArray[numberOfChunks-1],stringChunk);
-        
-        stringChunk = strtok(NULL, " ");
-    }
-    free(inputStringDuplicate);//frees the malloc made in strdup()
-    //$(numberOfChunks) strings now stored in the commandArray
-    *numberOfChunksPtr=numberOfChunks;
-    return commandArray;
-}
-
+                         
 /* duplicates a string */
 char *strdup(const char * s)
 {
-    size_t len = 1+strlen(s);
-    char *p = malloc(len);
+    size_t len = 1+strlen(s);//gets the size of s
+    char *p = malloc(len);//allocates a block big enough to hold s
     
-    return p ? memcpy(p, s, len) : NULL;//if malloc worked then duplicate the strings
+    return p ? memcpy(p, s, len) : NULL;//if p is non 0 ie malloc worked, then copy everything in s into p and return p. if p is NULL malloc didnt work so return NULL
 }
 
 /*frees the memory allocated in breakup string funct*/
@@ -151,4 +187,6 @@ void testGetAction(enum commandType action)
     validActions[4]="cat";
     printf("****testGetAction****\n");
     printf("read action: %s\n", validActions[action]);
+    free(validActions);//free the mallocd array
+
 }
